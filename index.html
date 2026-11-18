@@ -1,12 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>APEX GARAGE — Professional Automotive Workshop</title>
+  <title>Apex Garage — Know your machine</title>
+  <meta name="description" content="Apex Garage is a performance and maintenance workshop. Learn how your car works, what it needs, and book a visit.">
+  <meta name="theme-color" content="#0B0B0C">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230B0B0C'/%3E%3Cpath d='M8 24 16 7l8 17' fill='none' stroke='%23FF4F1F' stroke-width='3.5'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600&family=Unbounded:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <script type="importmap">
   {
@@ -17,1708 +20,263 @@
   }
   </script>
 </head>
-<body>
+<body class="is-loading">
 
-  <!-- Canvas -->
-  <canvas id="main-canvas"></canvas>
-
-  <!-- Fixed ambience -->
-  <div id="scanlines"></div>
-  <div id="vignette"></div>
-  <!-- BUG 2 FIX: Hero bottom vignette element -->
-  <div id="hero-vignette-bottom"></div>
-  <div id="grain"></div>
-  <canvas id="gl-canvas"></canvas>
-
-  <!-- Cursor -->
-  <div id="cursor"></div>
-  <div id="cursor-dot"></div>
-  <div id="cursor-view">VIEW</div>
-
-  <!-- Mustang 3D Intro -->
-  <div id="mustang-intro">
-    <canvas id="mustang-canvas"></canvas>
-    <div class="mi-bar mi-bar-top"></div>
-    <div class="mi-bar mi-bar-bot"></div>
-    <div class="mi-vignette"></div>
-    <div class="mi-bot-grad"></div>
-    <div id="mi-overlay-text">
-      <div id="mi-badge">SHELBY AMERICAN · GT500</div>
-      <div id="mi-name">MUSTANG</div>
-      <div id="mi-spec">760 BHP · 5.2L SUPERCHARGED V8 · APEX GARAGE BUILD</div>
-    </div>
-    <div id="mi-amber-line"></div>
-    <button id="mi-skip">ENTER SITE</button>
+  <!-- ===== Loader ===== -->
+  <div class="loader" id="loader" aria-hidden="true">
+    <div class="loader__count"><span id="loaderNum">000</span></div>
+    <div class="loader__bar"><i id="loaderBar"></i></div>
   </div>
 
-  <!-- Loader -->
-  <div id="loader">
-    <div id="loader-logo">APEX GARAGE</div>
-    <div id="loader-pct">LOADING... 0%</div>
-    <div id="loader-bar-track">
-      <div id="loader-bar-fill"></div>
-    </div>
-  </div>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="cursor" id="cursor" aria-hidden="true"></div>
+  <div class="progress" aria-hidden="true"><i id="progress"></i></div>
 
-  <!-- Section transition line -->
-  <div id="sec-transition-line"></div>
-
-  <!-- Scroll progress indicator -->
-  <div id="scroll-progress">
-    <div id="sp-act"><span id="sp-act-inner">LAUNCH</span></div>
-    <div id="sp-bar-track"><div id="sp-bar-fill"></div></div>
-    <div id="sp-frame">FRAME 001 / 192</div>
-  </div>
-
-  <!-- Amber top border + Navbar -->
-  <div id="top-border"></div>
-  <nav id="navbar">
-    <a href="#" class="nav-logo">
-      <svg viewBox="0 0 24 24"><path d="M22.61 18.99l-9.08-9.08c.93-2.34.45-5.1-1.44-6.99-2.29-2.29-5.73-2.9-8.65-1.5l4.76 4.75-3.49 3.5-4.76-4.76c-1.38 2.93-.76 6.37 1.53 8.66 1.89 1.89 4.65 2.37 6.99 1.44l9.08 9.08c.78.78 2.05.78 2.83 0l2.2-2.2c.79-.78.79-2.06.03-2.9z"/></svg>
-      APEX GARAGE
-    </a>
-    <ul class="nav-links">
-      <li><a href="#services-section">Services</a></li>
-      <li><a href="#">Gallery</a></li>
-      <li><a href="#">About</a></li>
-      <li><a href="#footer">Contact</a></li>
+  <!-- ===== Nav ===== -->
+  <header class="nav" id="nav">
+    <a href="#top" class="nav__logo">APEX/GARAGE</a>
+    <ul class="nav__links">
+      <li><a href="#anatomy">Anatomy</a></li>
+      <li><a href="#engine">Engine</a></li>
+      <li><a href="#services">Services</a></li>
+      <li><a href="#clock">Mileage</a></li>
+      <li><a href="#lights">Warning lights</a></li>
     </ul>
-  </nav>
+    <a href="#book" class="nav__cta"><i></i>Book a visit</a>
+  </header>
 
-  <!-- Hero content (fixed, revealed after loader) -->
-  <div id="hero-content">
-    <span class="hero-eyebrow" id="hero-eyebrow">PROFESSIONAL AUTOMOTIVE WORKSHOP</span>
-    <h1>
-      <span class="hero-line-wrap"><span class="hero-line-inner" id="hero-l1">ENGINEERED</span></span>
-      <span class="hero-line-wrap"><span class="hero-line-inner" id="hero-l2">FOR</span></span>
-      <span class="hero-line-wrap"><span class="hero-line-inner" id="hero-l3">EXCELLENCE</span></span>
-    </h1>
-    <p id="hero-sub">Where performance meets precision.<br>Every detail engineered to outlast the road.</p>
-    <button class="hero-cta" id="hero-cta-btn">EXPLORE THE BUILD</button>
-  </div>
-  <div id="hero-scroll-indicator">
-    <span>DRAG TO EXPLORE</span>
-    <div class="drag-icon">
-      <div class="drag-arrow-l"></div>
-      <div class="drag-line"></div>
-      <div class="drag-dot"></div>
-      <div class="drag-line"></div>
-      <div class="drag-arrow-r"></div>
-    </div>
-  </div>
+  <main>
 
-  <!-- ═══════════════════════════════════════════════════════
-       ACT 1 PHRASES
-  ═══════════════════════════════════════════════════════ -->
+    <!-- ===== Hero ===== -->
+    <section class="hero" id="top">
+      <div class="hero__body">
+        <h1 class="hero__title" id="heroTitle">
+          <span class="line" data-split>Know your</span>
+          <span class="line line--2" data-split><em>machine.</em></span>
+        </h1>
 
-  <!-- Phrase 1 (0–15%): word-punch headline + typewriter body -->
-  <div id="a1p1" class="phrase pos-bottom-left">
-    <span class="ph-eyebrow" id="a1p1-eyebrow">ACT I — 00:00</span>
-    <span class="punch-word" id="a1p1-w1">BORN</span>
-    <span class="punch-word" id="a1p1-w2">TO</span>
-    <span class="punch-word" id="a1p1-w3">PERFORM</span>
-    <span class="ph-body" id="a1p1-body" style="margin-top:16px;">Every build starts with a vision.<br>Ours starts at full throttle.</span>
-  </div>
-
-  <!-- Phrase 2 (20–40%): HP counter slides in from right -->
-  <div id="a1p2" class="phrase pos-right-center">
-    <span class="ph-number" id="a1p2-num">0+</span>
-    <span class="ph-number-label">HORSEPOWER</span>
-    <span class="ph-body" id="a1p2-sub" style="opacity:0;">Of raw, precision-tuned American muscle.<br>Built to dominate every straight.</span>
-  </div>
-
-  <!-- Phrase 3 (45–65%): stacked words, each on own line -->
-  <div id="a1p3" class="phrase pos-center">
-    <span class="stack-word" id="a1p3-w1">THE</span>
-    <span class="stack-word" id="a1p3-w2">ROAD</span>
-    <span class="stack-word" id="a1p3-w3">IS JUST</span>
-    <span class="stack-word" id="a1p3-w4">THE BEGINNING</span>
-    <span class="ph-body" id="a1p3-sub" style="margin-top:22px;opacity:0;">Push every limit. Redefine what fast means.<br>Then bring it back to us.</span>
-  </div>
-
-  <!-- Phrase 4 (70–85%): stat block with drawing underline -->
-  <div id="a1p4" class="phrase pos-bottom-right">
-    <span class="ph-rule" id="a1p4-rule" style="transform:scaleX(0);"></span>
-    <span class="ph-stat-label">SUPERCHARGED V8 · GT500 · SHELBY AMERICAN</span>
-    <span class="ph-body">Hand-assembled. Dyno-tested. Track-proven.</span>
-  </div>
-
-  <!-- Phrase 5 (90–100%): massive center with red glow -->
-  <div id="a1p5" class="phrase pos-center">
-    <span class="ph-headline ph-headline-xl ph-red-glow" style="display:block;">AND THEN —</span>
-    <span class="ph-headline ph-headline-xl ph-red-glow" style="display:block;">THE REAL WORK STARTS.</span>
-  </div>
-
-
-  <!-- ═══════════════════════════════════════════════════════
-       ACT 2 PHRASES
-  ═══════════════════════════════════════════════════════ -->
-
-  <!-- Phrase 1 (0–20%): pure dissolve, no movement -->
-  <div id="a2p1" class="phrase pos-top-center">
-    <span class="ph-eyebrow">ACT II — THE ARRIVAL</span>
-    <span class="ph-headline ph-headline-lg" style="display:block;">WHERE THE</span>
-    <span class="ph-headline ph-headline-lg" style="display:block;">ROAD ENDS</span>
-    <span class="ph-body" style="margin-top:16px;">The engine ticks. Steam rises.<br>A craftsman's hands are already moving.</span>
-  </div>
-
-  <!-- Phrase 2 (25–45%): left vertical text + right RPM counter -->
-  <div id="a2p2" class="phrase pos-left-vert">
-    <span class="ph-vert-text">CONTROLLED · PRECISE · DELIBERATE</span>
-  </div>
-  <div id="a2p2r" class="phrase pos-right-mid">
-    <span class="ph-number" id="a2p2r-rpm" style="font-size:clamp(48px,8vw,120px);">12,000 RPM</span>
-    <span class="ph-body" id="a2p2r-sub" style="margin-top:12px;opacity:0;">From full throttle to silence.<br>In the hands of a professional.</span>
-  </div>
-
-  <!-- Phrase 3 (50–65%): amber bar wipe per line -->
-  <div id="a2p3" class="phrase pos-center">
-    <span class="wipe-line" id="a2p3-l1">
-      <span class="wipe-bar-el" id="a2p3-b1"></span>
-      <span class="wipe-text" id="a2p3-t1">THE MACHINE</span>
-    </span>
-    <span class="wipe-line" id="a2p3-l2">
-      <span class="wipe-bar-el" id="a2p3-b2"></span>
-      <span class="wipe-text" id="a2p3-t2">COMES HOME</span>
-    </span>
-    <span class="ph-body" id="a2p3-sub" style="margin-top:22px;opacity:0;">Steam. Silence. The smell of hot metal.<br>And the sound of a craftsman who knows exactly what to do.</span>
-  </div>
-
-  <!-- Phrase 4 (70–85%): two-column slides from each side -->
-  <div id="a2p4" class="phrase pos-center">
-    <div class="two-col">
-      <div class="two-col-left" id="a2p4-l">
-        <span class="ph-stat-label">EST. 2006</span>
-        <span class="ph-body">Founded on obsession.<br>Built on reputation.</span>
+        <div class="hero__stage" id="heroStage" aria-hidden="true">
+          <svg class="hero__car" id="heroCar" viewBox="0 0 1000 420" fill="none" stroke="currentColor">
+            <path class="draw" stroke-width="1.6" d="M70,300 L68,250 Q72,222 110,212 L200,198 Q260,150 360,138 L540,134 Q600,136 690,200 L850,222 Q915,232 932,258 L936,296 L848,300 A68,68 0 0 0 712,300 L298,300 A68,68 0 0 0 162,300 Z"/>
+            <path class="draw" stroke-width="1" d="M222,196 Q270,158 360,148 L470,146 L470,196 Z M485,146 L540,145 Q590,148 660,198 L485,198 Z"/>
+            <circle class="draw" stroke-width="1.6" cx="230" cy="300" r="56"/>
+            <circle class="draw" stroke-width="1.6" cx="780" cy="300" r="56"/>
+            <circle class="draw" stroke-width="1" cx="230" cy="300" r="34"/>
+            <circle class="draw" stroke-width="1" cx="780" cy="300" r="34"/>
+            <path class="dim" stroke-width="1" d="M40,356 H960" stroke-dasharray="2 6"/>
+          </svg>
+          <canvas id="heroCanvas"></canvas>
+        </div>
       </div>
-      <div class="two-col-right" id="a2p4-r">
-        <span class="ph-stat-label">10,000+ HOURS</span>
-        <span class="ph-body">Of workshop time logged.<br>Of standards never lowered.</span>
+
+      <div class="hero__foot">
+        <p class="hero__lead" data-reveal>
+          <strong>Apex Garage</strong> is an independent workshop for people who want to understand their car, not just pay for it. Scroll to strip one down: how it works, what wears out, and what we do about it.
+        </p>
       </div>
-    </div>
-  </div>
+    </section>
 
-  <!-- Phrase 5 (90–100%): full width center -->
-  <div id="a2p5" class="phrase pos-center">
-    <span class="ph-headline ph-headline-lg" style="display:block;">EVERY BOLT</span>
-    <span class="ph-headline ph-headline-lg" style="display:block;">TELLS A STORY.</span>
-    <span class="ph-body ph-italic" style="margin-top:20px;">And we read every single one.</span>
-  </div>
-
-
-  <!-- ═══════════════════════════════════════════════════════
-       ACT 3 PHRASES
-  ═══════════════════════════════════════════════════════ -->
-
-  <!-- Phrase 1 (0–10%): top-left eyebrow + slide from left -->
-  <div id="a3p1" class="phrase pos-top-left">
-    <span class="ph-eyebrow">ACT III — THE CRAFT</span>
-    <span class="ph-headline ph-headline-lg" style="display:block;">THIS IS WHERE</span>
-    <span class="ph-headline ph-headline-lg" style="display:block;">WE WORK.</span>
-    <span class="ph-body" style="margin-top:14px;">No shortcuts. No estimates.<br>No leaving until it's right.</span>
-  </div>
-
-  <!-- Phrase 2 (12–25%): right — 01 Engine Removal -->
-  <div id="a3p2" class="phrase pos-right-stat">
-    <span class="ph-stat-num">01</span>
-    <span class="ph-stat-label" id="a3p2-title">ENGINE REMOVAL</span>
-    <span class="ph-rule" id="a3p2-rule" style="transform:scaleX(0);transform-origin:left;"></span>
-    <span class="ph-body">The heart of the machine.<br>Lifted with precision hoists.<br>Inspected with obsession.<br>Every seal, every surface, every thread.</span>
-  </div>
-
-  <!-- Phrase 3 (28–40%): left — 02 Suspension & Brakes -->
-  <div id="a3p3" class="phrase pos-left-stat">
-    <span class="ph-stat-num">02</span>
-    <span class="ph-stat-label" id="a3p3-title">SUSPENSION &amp; BRAKES</span>
-    <span class="ph-rule" id="a3p3-rule" style="transform:scaleX(0);transform-origin:left;"></span>
-    <span class="ph-body">Brembo calipers stripped and rebuilt.<br>Forged geometry realigned to microns.<br>Zero tolerance for imprecision.<br>Zero exceptions.</span>
-  </div>
-
-  <!-- Phrase 4 (43–55%): center massive, blur-clearing -->
-  <div id="a3p4" class="phrase pos-center">
-    <span class="ph-headline ph-headline-xl" id="a3p4-hl1" style="display:block;filter:blur(8px);"></span>
-    <span class="ph-headline ph-headline-xl" id="a3p4-hl2" style="display:block;filter:blur(8px);"></span>
-    <span class="ph-headline ph-headline-xl" id="a3p4-hl3" style="display:block;filter:blur(8px);"></span>
-    <span class="ph-body" id="a3p4-sub" style="margin-top:22px;opacity:0;">Every bearing. Every seal. Every surface.<br>Every bolt torqued to spec.<br>Every component signed off by name.</span>
-  </div>
-
-  <!-- Phrase 5 (58–70%): right — 03 Drivetrain -->
-  <div id="a3p5" class="phrase pos-right-stat">
-    <span class="ph-stat-num">03</span>
-    <span class="ph-stat-label" id="a3p5-title">DRIVETRAIN &amp; TRANSMISSION</span>
-    <span class="ph-rule" id="a3p5-rule" style="transform:scaleX(0);transform-origin:left;"></span>
-    <span class="ph-body">Power is nothing without the system<br>that delivers it.<br>We rebuild both from the ground up.</span>
-  </div>
-
-  <!-- Phrase 6 (73–83%): left — 04 Final Inspection -->
-  <div id="a3p6" class="phrase pos-left-stat">
-    <span class="ph-stat-num">04</span>
-    <span class="ph-stat-label" id="a3p6-title">FINAL INSPECTION</span>
-    <span class="ph-rule" id="a3p6-rule" style="transform:scaleX(0);transform-origin:left;"></span>
-    <span class="ph-body">Before anything leaves this workshop<br>it passes through our hands one last time.<br>Then through our checklist.<br>Then through our road test.<br>Only then does it leave.</span>
-  </div>
-
-  <!-- Phrase 7 (85–95%): majestic center — BUILT DIFFERENT -->
-  <div id="a3p7" class="phrase pos-center">
-    <span class="ph-headline ph-headline-xl" style="display:block;" id="a3p7-built">BUILT</span>
-    <span class="ph-headline ph-headline-xl" style="display:block;" id="a3p7-diff">DIFFERENT.</span>
-    <span class="ph-underline" id="a3p7-line"></span>
-    <span class="ph-body" id="a3p7-sub" style="margin-top:28px;opacity:0;">Because ordinary was never the standard here.</span>
-  </div>
-
-  <!-- ═══════════════════════════════════════════════════════
-       ACT 4 SPEC OVERLAY PHRASES
-  ═══════════════════════════════════════════════════════ -->
-
-  <!-- A4 Phase 0: Title (0–12%) -->
-  <div id="a4p0" class="phrase pos-top-left">
-    <span class="spec-eyebrow">ACT IV — THE SPECIFICATION</span>
-    <span class="ph-headline ph-headline-lg" style="display:block;">THE</span>
-    <span class="ph-headline ph-headline-lg" style="display:block;color:var(--amber);">NUMBERS</span>
-    <span class="ph-headline ph-headline-lg" style="display:block;">SPEAK.</span>
-  </div>
-
-  <!-- A4 Phase 1: Engine (10–24%) right -->
-  <div id="a4p1" class="phrase pos-right-stat">
-    <span class="spec-eyebrow">POWER PLANT</span>
-    <span class="spec-num-huge">4.0<span class="a" style="font-size:.48em;vertical-align:super;">L</span></span>
-    <span class="spec-unit">TWIN-TURBO FLAT-SIX</span>
-    <span class="spec-sub">10.5:1 COMPRESSION · 8,200 RPM REDLINE</span>
-  </div>
-
-  <!-- A4 Phase 2: Power output (22–36%) left -->
-  <div id="a4p2" class="phrase pos-left-stat">
-    <span class="spec-eyebrow">MAXIMUM OUTPUT</span>
-    <span class="spec-num-huge"><span class="a" id="a4cnt-hp">650</span></span>
-    <span class="spec-unit">BHP @ 7,000 RPM</span>
-    <span class="spec-sub">590 LB-FT TORQUE · 18 PSI MAX BOOST</span>
-  </div>
-
-  <!-- A4 Phase 3: 0–60 sprint (34–50%) center giant -->
-  <div id="a4p3" class="phrase pos-center">
-    <span class="spec-eyebrow" style="display:block;text-align:center;">ZERO TO SIXTY MPH</span>
-    <span class="spec-sprint">2.7</span>
-    <span class="spec-sprint-unit">SECONDS</span>
-  </div>
-
-  <!-- A4 Phase 4: Full spec grid (48–68%) fixed bottom -->
-  <div id="a4sg">
-    <div class="spec-grid-rule" id="a4gr"></div>
-    <div class="spec-grid">
-      <div class="spec-grid-cell">
-        <span class="spec-grid-n">1,420</span>
-        <span class="spec-grid-l">KG KERB WEIGHT</span>
-      </div>
-      <div class="spec-grid-cell">
-        <span class="spec-grid-n a">10.5:1</span>
-        <span class="spec-grid-l">COMPRESSION RATIO</span>
-      </div>
-      <div class="spec-grid-cell">
-        <span class="spec-grid-n">18 PSI</span>
-        <span class="spec-grid-l">MAXIMUM BOOST</span>
-      </div>
-      <div class="spec-grid-cell">
-        <span class="spec-grid-n a">8,200</span>
-        <span class="spec-grid-l">RPM REDLINE</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- A4 Phase 5: Closing phrase (66–84%) center -->
-  <div id="a4p5" class="phrase pos-center">
-    <span class="spec-close-l">PRECISION</span>
-    <span class="spec-close-l a">ENGINEERED.</span>
-    <span class="spec-close-b">Every specification earned.<br>Every number verified by hand.</span>
-  </div>
-
-  <!-- Finale overlay (96–100%) -->
-  <div id="finale-overlay">
-    <div id="finale-name">APEX GARAGE</div>
-    <div id="finale-tag">PROFESSIONAL AUTOMOTIVE WORKSHOP · EST. 2006</div>
-    <div id="finale-line"></div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════════════════
-       GAP OVERLAYS — APEX GARAGE SEPARATORS
-  ═══════════════════════════════════════════════════════ -->
-
-  <!-- ═══════════════════════════════════════════════════════
-       SCROLL SECTIONS
-  ═══════════════════════════════════════════════════════ -->
-  <div id="hero-section"></div>
-  <div id="act1-section"></div>
-  <div id="gap1-section"></div>
-  <div id="act2-section"></div>
-  <div id="gap2-section"></div>
-  <div id="act3-section"></div>
-  <div id="gap3-section"></div>
-
-  <!-- ═══════════════════════════════════════════════════════
-       INTERSTITIAL — TRUST BAR + ACT IV CURIOSITY
-  ═══════════════════════════════════════════════════════ -->
-  <section id="interstitial-section">
-
-    <!-- Trust bar: vehicle marques serviced -->
-    <div id="trust-bar">
-      <span class="trust-eyebrow">VEHICLES WE CERTIFY</span>
-      <div class="trust-row">
-        <span>PORSCHE</span>
-        <span>FERRARI</span>
-        <span>BMW M</span>
-        <span>McLAREN</span>
-        <span>LAMBORGHINI</span>
-        <span>ASTON MARTIN</span>
+    <!-- ===== Marquee ===== -->
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee__track" id="marquee">
+        <span>Engine</span><span>Brakes</span><span><em>Suspension</em></span><span>Cooling</span><span>Electrics</span><span><em>Diagnostics</em></span><span>MOT prep</span><span>Tyres</span>
       </div>
     </div>
 
-    <!-- Curiosity / Act IV teaser -->
-    <div id="curiosity-block">
-      <div class="curio-left">
-        <div class="curio-act-label">
-          <span class="curio-act-tag">ACT IV</span>
-          <div class="curio-act-rule"></div>
-          <span class="curio-act-sub">THE SPEC REVEAL</span>
-        </div>
-        <h2 class="curio-headline">THE<br>FINAL<br>MACHINE.</h2>
-        <p class="curio-body">One vehicle. 847 hours of precision work across 14 specialists. What follows is the complete technical record of its transformation.</p>
-        <div class="curio-cue">
-          <div class="curio-cue-line"></div>
-          <span>SCROLL TO WITNESS</span>
-        </div>
+    <!-- ===== 01 Anatomy ===== -->
+    <section class="section is-light" id="anatomy">
+      <div class="sec-top">
+        <h2 class="sec-title" data-split>How a car <em>actually</em> works.</h2>
+        <p class="sec-intro" data-reveal>A car is eight systems working in step. Pick one and the x-ray shows where it lives, what it does and what it sounds like when it starts to fail.</p>
       </div>
-      <div class="curio-right">
-        <div class="curio-stat-item" id="csi1">
-          <span class="curio-num">4.0L</span>
-          <span class="curio-unit">Twin-Turbo Flat-Six</span>
-        </div>
-        <div class="curio-stat-item" id="csi2">
-          <span class="curio-num">650</span>
-          <span class="curio-unit">Brake Horsepower</span>
-        </div>
-        <div class="curio-stat-item" id="csi3">
-          <span class="curio-num">2.9s</span>
-          <span class="curio-unit">Zero to One Hundred</span>
-        </div>
-        <div class="curio-stat-item" id="csi4">
-          <span class="curio-num">847</span>
-          <span class="curio-unit">Hours of Craftsmanship</span>
-        </div>
-      </div>
-    </div>
 
-  </section>
+      <div class="anat">
+        <ul class="anat__list" id="anatList" role="tablist" aria-label="Car systems"></ul>
 
-  <!-- Act 4 — isolated spec reveal section -->
-  <div id="act4-section"></div>
-
-  <!-- ═══════════════════════════════════════════════════════
-       SERVICES
-  ═══════════════════════════════════════════════════════ -->
-  <section id="services-section">
-    <span class="sec-eyebrow">What We Do</span>
-    <h2 class="sec-title">WHAT WE DO</h2>
-    <div class="sec-title-rule"></div>
-
-    <div class="services-grid">
-
-      <div class="svc-card" id="svc1">
-        <svg class="svc-icon" viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="10" y="14" width="24" height="16" rx="2"/>
-          <path d="M10 20H6M10 24H6M34 20h4M34 24h4"/>
-          <rect x="17" y="10" width="4" height="4" rx="1"/>
-          <rect x="23" y="10" width="4" height="4" rx="1"/>
-          <circle cx="22" cy="22" r="3"/>
-          <path d="M22 30v4"/>
-        </svg>
-        <div class="svc-title">ENGINE REBUILDS</div>
-        <div class="svc-tagline">From heartbeat to full roar.</div>
-        <p class="svc-desc">Complete teardown to rebuild. Every component machined, measured and matched beyond factory spec. We do not refurbish. We rebuild.</p>
-        <div class="svc-rule"></div>
-        <div class="svc-footer">
-          <div class="svc-cta">
-            Learn More
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        <div>
+          <div class="anat__stage" id="anatStage">
+            <canvas id="anatCanvas" aria-label="3D car. Pick a system to see it inside the car."></canvas>
+            <div class="pins" id="anatPins"></div>
           </div>
-          <span class="svc-arrow">→</span>
-        </div>
-      </div>
-
-      <div class="svc-card" id="svc2">
-        <svg class="svc-icon" viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M6 28h32v6H6z"/>
-          <path d="M10 28l5-10h14l5 10"/>
-          <circle cx="14" cy="35" r="3"/>
-          <circle cx="30" cy="35" r="3"/>
-          <path d="M17 18h10M6 28H4v-3l2-2M38 28h2v-3l-2-2"/>
-        </svg>
-        <div class="svc-title">FULL RESTORATIONS</div>
-        <div class="svc-tagline">Back to better than new.</div>
-        <p class="svc-desc">Frame-off restoration with obsessive period-correct detail and modern mechanical reliability built in. Your car. Reborn.</p>
-        <div class="svc-rule"></div>
-        <div class="svc-footer">
-          <div class="svc-cta">
-            Learn More
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+<div class="anat__panel" aria-live="polite">
+            <div class="anat__cell">
+              <span class="label">How it works</span>
+              <div class="swap" id="anatHow">
+                <h3 class="anat__name"></h3>
+                <p></p>
+              </div>
+            </div>
+            <div class="anat__cell">
+              <span class="label">Listen for</span>
+              <p class="swap" id="anatSigns"></p>
+            </div>
+            <div class="anat__cell">
+              <span class="label">What we do</span>
+              <div class="swap" id="anatDo">
+                <p></p>
+                <span class="tag anat__interval"></span>
+              </div>
+            </div>
           </div>
-          <span class="svc-arrow">→</span>
         </div>
       </div>
+    </section>
 
-      <div class="svc-card" id="svc3">
-        <svg class="svc-icon" viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M8 36a16 16 0 1 1 28 0"/>
-          <path d="M22 20v4M14 24l2.8 2.8M30 24l-2.8 2.8"/>
-          <circle cx="22" cy="32" r="2" fill="currentColor" stroke="none"/>
-          <path d="M22 32L27 23"/>
-        </svg>
-        <div class="svc-title">PERFORMANCE UPGRADES</div>
-        <div class="svc-tagline">Your limit. Engineered beyond it.</div>
-        <p class="svc-desc">Superchargers, suspension geometry, big brake kits and custom ECU tune. Every upgrade tested, logged and proven on the dyno before it leaves.</p>
-        <div class="svc-rule"></div>
-        <div class="svc-footer">
-          <div class="svc-cta">
-            Learn More
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+    <!-- ===== 02 Engine ===== -->
+    <section class="section" id="engine">
+      <div class="sec-top">
+        <h2 class="sec-title" data-split>Suck. Squeeze. <em>Bang.</em> Blow.</h2>
+        <p class="sec-intro" data-reveal>Almost every petrol car runs on the same four-step loop, thousands of times a minute. Rev it, turn the crank by hand, or tap the parts to see what each one does and what wears out.</p>
+      </div>
+
+      <div class="engine__wrap">
+        <div class="frame engine__stage" id="engineStage" data-reveal>
+          <canvas id="engineCanvas" aria-label="3D cutaway of a single engine cylinder"></canvas>
+          <div class="pins" id="enginePins"></div>
+          <div class="part-card" id="partCard" aria-live="polite">
+            <div class="swap" id="partBody">
+              <h3>Tap a <em>+</em> to meet the parts.</h3>
+              <p>Each one has a job, a way of wearing out, and a way we look after it.</p>
+            </div>
           </div>
-          <span class="svc-arrow">→</span>
         </div>
-      </div>
 
-      <div class="svc-card" id="svc4">
-        <svg class="svc-icon" viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="8" y="12" width="28" height="20" rx="3"/>
-          <path d="M14 24h4l3-6 4 12 3-6h4"/>
-          <path d="M16 36v4M28 36v4M12 40h20"/>
-        </svg>
-        <div class="svc-title">DIAGNOSTICS &amp; REPAIR</div>
-        <div class="svc-tagline">We find what others miss.</div>
-        <p class="svc-desc">State of the art diagnostic equipment paired with old school thoroughness. If something is wrong with your car we will find it. Then we will fix it properly.</p>
-        <div class="svc-rule"></div>
-        <div class="svc-footer">
-          <div class="svc-cta">
-            Learn More
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        <div>
+          <div class="engine__stroke-name" aria-live="polite"><span id="strokeNum">1</span>/<b id="strokeName" style="font-weight:inherit">Intake</b></div>
+          <p class="engine__desc" id="strokeDesc"></p>
+
+          <div class="strokes" id="strokes">
+            <button data-s="0"><b>Intake</b><i></i></button>
+            <button data-s="1"><b>Compression</b><i></i></button>
+            <button data-s="2"><b>Power</b><i></i></button>
+            <button data-s="3"><b>Exhaust</b><i></i></button>
           </div>
-          <span class="svc-arrow">→</span>
+
+          <div class="controls">
+            <button class="btn-round" id="engToggle" aria-label="Pause engine">
+              <svg id="engIcon" width="18" height="18" viewBox="0 0 18 18" fill="currentColor"><rect x="3" y="2" width="4" height="14"/><rect x="11" y="2" width="4" height="14"/></svg>
+            </button>
+            <label class="rpm">
+              <span class="rpm__top label"><span>Engine speed</span><b><span id="rpmVal">900</span> rpm</b></span>
+              <input type="range" id="rpm" min="600" max="7000" step="50" value="900" aria-label="Engine speed in rpm">
+            </label>
+          </div>
+          <label class="rpm crank-hand">
+            <span class="rpm__top label"><span>Turn the crank by hand</span><b id="crankVal">0°</b></span>
+            <input type="range" id="crankHand" min="0" max="719" step="1" value="0" aria-label="Crank angle, 0 to 720 degrees">
+          </label>
+
+          <div class="readouts">
+            <div><span class="label">Piston strokes a second</span><b id="roTrips">30</b></div>
+            <div><span class="label">Sparks a second, one cylinder</span><b id="roFires">7.5</b></div>
+            <div><span class="label">Sparks a second, four cylinders</span><b id="roFires4">30</b></div>
+          </div>
+          <p class="clock__note">The animation is slowed down so you can follow it. The numbers above are real for the rpm you pick.</p>
         </div>
       </div>
+    </section>
 
-    </div>
-  </section>
+    <!-- ===== 03 Services ===== -->
+    <section class="section is-light" id="services">
+      <div class="sec-top">
+        <h2 class="sec-title" data-split>The <em>service</em> menu.</h2>
+        <p class="sec-intro" data-reveal>Everything from a quick oil change to a full rebuild, all done in our own workshop. Open any line to see what's included.</p>
+      </div>
+      <ul class="svc" id="svcList"></ul>
+    </section>
 
-  <!-- Stats bar -->
-  <div id="stats-section">
-    <div class="stats-row">
-      <div class="stat-item">
-        <span class="stat-num" id="sn1">0</span>
-        <span class="stat-label">Builds Completed</span>
-        <span class="stat-sub">and counting.</span>
+    <!-- ===== 04 Clock ===== -->
+    <section class="section" id="clock">
+      <div class="sec-top">
+        <h2 class="sec-title" data-split>What's your car <em>due?</em></h2>
+        <p class="sec-intro" data-reveal>Drag the slider to your mileage. We'll show what's coming up and what's overdue, based on typical service intervals.</p>
       </div>
-      <div class="stat-item">
-        <span class="stat-num" id="sn2">0</span>
-        <span class="stat-label">Years of Experience</span>
-        <span class="stat-sub">not one wasted.</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-num" id="sn3">0%</span>
-        <span class="stat-label">Client Satisfaction</span>
-        <span class="stat-sub">the only metric that matters.</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-num" id="sn4">1</span>
-        <span class="stat-label">Standard of Excellence</span>
-        <span class="stat-sub">uncompromised since day one.</span>
-      </div>
-    </div>
-  </div>
 
-  <!-- Footer -->
-  <footer id="footer">
-    <div class="footer-top">
-      <div class="footer-logo">
-        <svg viewBox="0 0 24 24"><path d="M22.61 18.99l-9.08-9.08c.93-2.34.45-5.1-1.44-6.99-2.29-2.29-5.73-2.9-8.65-1.5l4.76 4.75-3.49 3.5-4.76-4.76c-1.38 2.93-.76 6.37 1.53 8.66 1.89 1.89 4.65 2.37 6.99 1.44l9.08 9.08c.78.78 2.05.78 2.83 0l2.2-2.2c.79-.78.79-2.06.03-2.9z"/></svg>
-        APEX GARAGE
+      <div class="clock__wrap">
+        <div data-reveal>
+          <div class="odo" id="odo" aria-hidden="true"></div>
+          <div class="clock__slider">
+            <input type="range" id="miles" min="0" max="150000" step="500" value="42500" aria-label="Current mileage">
+          </div>
+          <p class="clock__note">These are typical intervals. Your handbook (and how you drive) has the final say. Time matters as well as miles: oil and brake fluid age even when the car sits still.</p>
+        </div>
+        <ul class="due" id="dueList" aria-live="polite"></ul>
       </div>
-      <div class="footer-taglines">
-        <span class="footer-tagline-line" id="ftl1">Built different.</span>
-        <span class="footer-tagline-line" id="ftl2">Finished perfect.</span>
-        <span class="footer-quote" id="ftq">"We don't clock out until it's right."</span>
+    </section>
+
+    <!-- ===== 05 Warning lights ===== -->
+    <section class="section is-light" id="lights">
+      <div class="sec-top">
+        <h2 class="sec-title" data-split>Something's <em>lit up.</em> Now what?</h2>
+        <p class="sec-intro" data-reveal>Red means stop. Amber means book in soon. Tap a light to see what it means and what to do next.</p>
       </div>
+
+      <div class="lights__wrap">
+        <div class="dash" id="dash" role="tablist" aria-label="Dashboard warning lights" data-reveal></div>
+        <div class="light-info" aria-live="polite">
+          <span class="sev" id="lightSev"><i></i><span>Stop</span></span>
+          <div class="swap" id="lightBody">
+            <h3></h3>
+            <p></p>
+          </div>
+          <div class="do"><span class="label">What to do</span><p class="swap" id="lightDo"></p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 06 Process ===== -->
+    <section class="section" id="process">
+      <div class="sec-top">
+        <h2 class="sec-title" data-split>We show our <em>working.</em></h2>
+      </div>
+      <div class="steps">
+        <article class="step" data-reveal style="--d:0ms"><span class="step__n">01</span><h3>Listen</h3><p>You tell us what you've noticed: the noise, the light, the feel. Nobody knows your car better than you do.</p></article>
+        <article class="step" data-reveal style="--d:120ms"><span class="step__n">02</span><h3>Diagnose</h3><p>Fault codes, a road test and a proper look underneath. We find the cause, not just the symptom.</p></article>
+        <article class="step" data-reveal style="--d:240ms"><span class="step__n">03</span><h3>Explain</h3><p>Photos, a plain-English explanation and a fixed quote before any spanner turns. You decide.</p></article>
+        <article class="step" data-reveal style="--d:360ms"><span class="step__n">04</span><h3>Hand back</h3><p>A written report, a stamped service book and the old parts, if you want them.</p></article>
+      </div>
+    </section>
+
+    <!-- ===== 07 Book ===== -->
+    <section class="section is-signal book" id="book">
+      <div class="book__wrap">
+        <form id="bookForm" novalidate>
+          <h2 class="sec-title" data-split>Build your <em>visit.</em></h2>
+          <span class="field-label label">What does it need?</span>
+          <div class="chips" id="chips"></div>
+          <span class="field-label label">About you and the car</span>
+          <div class="fields">
+            <label class="input"><span class="label">Name</span><input type="text" id="fName" placeholder="Your name" autocomplete="name"></label>
+            <label class="input"><span class="label">Phone</span><input type="tel" id="fPhone" placeholder="07…" autocomplete="tel"></label>
+            <label class="input"><span class="label">Registration</span><input type="text" id="fReg" placeholder="AB12 CDE" style="text-transform:uppercase"></label>
+            <label class="input"><span class="label">Make and model</span><input type="text" id="fCar" placeholder="e.g. Ford Mustang GT"></label>
+          </div>
+        </form>
+
+        <aside class="ticket" id="ticket" aria-live="polite">
+          <div class="ticket__top label"><span>Job card</span><span id="ticketReg">—</span></div>
+          <div class="ticket__hours"><span id="ticketHours">0</span><small> hrs on the bench</small></div>
+          <ul class="ticket__list" id="ticketList"><li class="empty">Pick a service to start your job card.</li></ul>
+          <button class="ticket__submit" id="ticketSubmit" type="submit" form="bookForm"><span id="submitTxt">Request a slot</span><span>→</span></button>
+          <p class="ticket__fine" id="ticketFine">Times are estimates. We'll confirm the price before any work starts.</p>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="footer" id="contact">
+    <div class="footer__cols">
+      <div><span class="label">Visit</span><p>[Workshop address]<br>[Town, Postcode]</p></div>
+      <div><span class="label">Hours</span><p>Mon–Fri 08:00–18:00<br>Sat 09:00–13:00</p></div>
+      <div><span class="label">Talk to us</span><p><a href="tel:+440000000000">[Phone number]</a><br><a href="mailto:hello@example.com">[Email address]</a></p></div>
+      <div><span class="label">Follow</span><p><a href="#">Instagram</a><br><a href="#">YouTube</a></p></div>
     </div>
-    <div class="footer-rule"></div>
-    <ul class="footer-nav">
-      <li><a href="#">Services</a></li>
-      <li><a href="#">Gallery</a></li>
-      <li><a href="#">About</a></li>
-      <li><a href="#">Contact</a></li>
-      <li><a href="#">Privacy</a></li>
-    </ul>
-    <div class="footer-social">
-      <a href="#" class="social-btn" aria-label="Instagram">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r=".8" fill="currentColor" stroke="none"/></svg>
-      </a>
-      <a href="#" class="social-btn" aria-label="Facebook">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-      </a>
-      <a href="#" class="social-btn" aria-label="YouTube">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="currentColor" stroke="none"/></svg>
-      </a>
-    </div>
-    <p class="footer-copy">© 2024 APEX GARAGE. ALL RIGHTS RESERVED.</p>
+    <div class="footer__word" id="footerWord">APEX<em>garage</em></div>
+    <div class="footer__base label"><span>© <span id="year">2026</span> Apex Garage</span><a href="#top">Back to top ↑</a></div>
   </footer>
 
-  <!-- Three.js -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-  <!-- GSAP -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-
-  <script>
-  'use strict';
-
-  gsap.registerPlugin(ScrollTrigger);
-  ScrollTrigger.normalizeScroll(true);
-
-  document.body.style.overflowY = 'hidden';
-
-  /* ═══════════════════════════════════════════════════════════════════════════
-     CONSTANTS
-  ═══════════════════════════════════════════════════════════════════════════ */
-  const FRAME_COUNT  = 192;
-  const TOTAL_FRAMES = FRAME_COUNT * 4;
-
-  /* ═══════════════════════════════════════════════════════════════════════════
-     CANVAS
-  ═══════════════════════════════════════════════════════════════════════════ */
-  const canvas = document.getElementById('main-canvas');
-  const ctx    = canvas.getContext('2d');
-  let lastDrawnSrc = '';
-  let _currentFrameImg = null;
-
-  function resizeCanvas() {
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
-    lastDrawnSrc  = '';
-    if (_currentFrameImg) drawFrame(_currentFrameImg);
-  }
-
-  function drawFrame(img) {
-    if (!img || !img.complete || !img.naturalWidth) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#000';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      return;
-    }
-    if (img.src === lastDrawnSrc) return;
-    lastDrawnSrc = img.src;
-    _currentFrameImg = img;
-    const iw    = img.naturalWidth;
-    const ih    = img.naturalHeight;
-    const cw    = canvas.width;
-    const ch    = canvas.height;
-    const scale = Math.max(cw / iw, ch / ih);
-    const x     = Math.round((cw - iw * scale) / 2);
-    const y     = Math.round((ch - ih * scale) / 2);
-    ctx.clearRect(0, 0, cw, ch);
-    ctx.drawImage(img, x, y, Math.round(iw * scale), Math.round(ih * scale));
-  }
-
-  window.addEventListener('resize', resizeCanvas);
-  resizeCanvas();
-
-
-  /* ═══════════════════════════════════════════════════════════════════════════
-     SPLIT TEXT
-  ═══════════════════════════════════════════════════════════════════════════ */
-  function splitTextToChars(el, text) {
-    el.innerHTML = '';
-    [...text].forEach(ch => {
-      const s = document.createElement('span');
-      if (ch === ' ') { s.className = 'char-space'; }
-      else { s.className = 'char'; s.textContent = ch; }
-      el.appendChild(s);
-    });
-    return el.querySelectorAll('.char');
-  }
-
-  /* pre-split Act 3 center phrase */
-  const a3p4Chars1 = splitTextToChars(document.getElementById('a3p4-hl1'), 'NOTHING');
-  const a3p4Chars2 = splitTextToChars(document.getElementById('a3p4-hl2'), 'ESCAPES');
-  const a3p4Chars3 = splitTextToChars(document.getElementById('a3p4-hl3'), 'OUR ATTENTION.');
-
-  /* ═══════════════════════════════════════════════════════════════════════════
-     SCROLL PROGRESS
-  ═══════════════════════════════════════════════════════════════════════════ */
-  const spEl       = document.getElementById('scroll-progress');
-  const spActInner = document.getElementById('sp-act-inner');
-  const spBarFill  = document.getElementById('sp-bar-fill');
-  const spFrame    = document.getElementById('sp-frame');
-  let   currentAct = 0;
-
-  function updateScrollProgress(act, progress, frameIdx) {
-    spEl.classList.add('visible');
-    spBarFill.style.height = (progress * 100) + '%';
-    const frameNum = String(frameIdx + 1).padStart(3, '0');
-    spFrame.textContent = 'FRAME ' + frameNum + ' / 192';
-
-    if (act !== currentAct) {
-      currentAct = act;
-      const labels = { 1: 'LAUNCH', 2: 'ARRIVAL', 3: 'CRAFT' };
-      gsap.to(spActInner, {
-        opacity: 0, y: 6, duration: 0.15,
-        onComplete() {
-          spActInner.textContent = labels[act] || '';
-          gsap.to(spActInner, { opacity: 1, y: 0, duration: 0.2 });
-        }
-      });
-    }
-  }
-
-  /* ═══════════════════════════════════════════════════════════════════════════
-     SECTION TRANSITION LINE
-  ═══════════════════════════════════════════════════════════════════════════ */
-  let lineInProgress = false;
-  function drawTransitionLine() {
-    if (lineInProgress) return;
-    lineInProgress = true;
-    const line = document.getElementById('sec-transition-line');
-    gsap.fromTo(line,
-      { scaleX: 0, opacity: 1 },
-      {
-        scaleX: 1, opacity: 1, duration: 0.55, ease: 'power2.inOut',
-        onComplete() {
-          gsap.to(line, {
-            opacity: 0, duration: 0.3, delay: 0.1,
-            onComplete() { lineInProgress = false; gsap.set(line, { scaleX: 0 }); }
-          });
-        }
-      }
-    );
-  }
-
-  /* ═══════════════════════════════════════════════════════════════════════════
-     FRAME ARRAYS
-  ═══════════════════════════════════════════════════════════════════════════ */
-  const act1Frames = new Array(FRAME_COUNT);
-  const act2Frames = new Array(FRAME_COUNT);
-  const act3Frames = new Array(FRAME_COUNT);
-  const act4Frames = new Array(FRAME_COUNT);
-
-  let loadedCount  = 0;
-  let allLoaded    = false;
-  let minTimeReady = false;
-  let introComplete = false;
-
-  function onFrameProgress(frac) {
-    const pct = Math.round(frac * 100);
-    document.getElementById('loader-pct').textContent = 'LOADING... ' + pct + '%';
-    gsap.to('#loader-bar-fill', { width: pct + '%', duration: 0.25, ease: 'none', overwrite: true });
-  }
-
-  function loadActFrames(actNum, array) {
-    return new Promise(resolve => {
-      let done = 0;
-      for (let i = 0; i < FRAME_COUNT; i++) {
-        const img = new Image();
-        const n   = String(i + 1).padStart(4, '0');
-        img.src   = 'frames/act' + actNum + '/frame_' + n + '.jpg';
-        array[i]  = img;
-        const settle = () => {
-          loadedCount++; done++;
-          onFrameProgress(loadedCount / TOTAL_FRAMES);
-          if (done === FRAME_COUNT) resolve();
-        };
-        img.onload  = settle;
-        img.onerror = settle;
-      }
-    });
-  }
-
-  /* ═══════════════════════════════════════════════════════════════════════════
-     LOADER ANIMATION & LAUNCH
-  ═══════════════════════════════════════════════════════════════════════════ */
-  function maybeLaunch() {
-    if (allLoaded && minTimeReady && introComplete) launchExperience();
-  }
-
-  function launchExperience() {
-    drawFrame(act1Frames[0]);
-
-    /* split eyebrow into chars for letter-by-letter reveal */
-    const eyebrowEl = document.getElementById('hero-eyebrow');
-    const eyebrowText = eyebrowEl.textContent;
-    eyebrowEl.textContent = '';
-    eyebrowText.split('').forEach(ch => {
-      const s = document.createElement('span');
-      s.style.opacity = '0';
-      s.style.display = 'inline-block';
-      s.textContent   = ch === ' ' ? ' ' : ch;
-      eyebrowEl.appendChild(s);
-    });
-    const eyebrowChars = eyebrowEl.querySelectorAll('span');
-
-    const tl = gsap.timeline({
-      onComplete() { document.body.style.overflowY = ''; }
-    });
-
-    tl.to('#loader-logo', { opacity: 0, y: -20, duration: 0.4, ease: 'power2.in' })
-      .to('#loader', {
-        yPercent: -100, duration: 0.9, ease: 'power2.inOut',
-        onComplete() { document.getElementById('loader').style.display = 'none'; }
-      }, '-=0.1')
-      .to('#hero-content', { opacity: 1, duration: 0.5, ease: 'power2.out' }, '-=0.2')
-      /* eyebrow letter by letter */
-      .fromTo(eyebrowChars, { opacity: 0 }, { opacity: 1, stagger: 0.038, duration: 0.02, ease: 'none' }, '-=0.1')
-      /* headline lines slide up with 0.15s stagger */
-      .fromTo('#hero-l1', { y: '105%' }, { y: '0%', duration: 0.65, ease: 'power3.out' }, '+=0.05')
-      .fromTo('#hero-l2', { y: '105%' }, { y: '0%', duration: 0.65, ease: 'power3.out' }, '-=0.50')
-      .fromTo('#hero-l3', { y: '105%' }, { y: '0%', duration: 0.65, ease: 'power3.out' }, '-=0.50')
-      /* subtext fade */
-      .to('#hero-sub', { opacity: 1, duration: 0.6, ease: 'power2.out' }, '+=0.2')
-      /* scroll indicator */
-      .to('#hero-scroll-indicator', { opacity: 1, duration: 0.6, ease: 'power2.out' }, '-=0.3');
-
-    /* CTA pulse loop — starts independently */
-    tl.call(() => {
-      gsap.to('#hero-cta-btn', {
-        scale: 1.03, duration: 1.4, ease: 'sine.inOut', yoyo: true, repeat: -1
-      });
-    });
-
-    requestAnimationFrame(() => requestAnimationFrame(initScrollTriggers));
-  }
-
-  gsap.to('#loader-logo', { opacity: 1, duration: 0.7, ease: 'power2.out' });
-
-  Promise.all([
-    loadActFrames(1, act1Frames),
-    loadActFrames(2, act2Frames),
-    loadActFrames(3, act3Frames),
-    loadActFrames(4, act4Frames),
-  ]).then(() => { allLoaded = true; maybeLaunch(); });
-
-  setTimeout(() => { minTimeReady = true; maybeLaunch(); }, 1200);
-
-  /* ═══════════════════════════════════════════════════════════════════════════
-     CUSTOM CURSOR
-  ═══════════════════════════════════════════════════════════════════════════ */
-  (function initCursor() {
-    const ring    = document.getElementById('cursor');
-    const dot     = document.getElementById('cursor-dot');
-    const viewLbl = document.getElementById('cursor-view');
-    let mx = innerWidth / 2, my = innerHeight / 2;
-    let rx = mx, ry = my;
-
-    document.addEventListener('mousemove', e => {
-      mx = e.clientX; my = e.clientY;
-      gsap.to(dot, { x: mx, y: my, duration: 0.06, overwrite: true });
-      gsap.to(viewLbl, { x: mx, y: my, duration: 0.06, overwrite: true });
-    });
-
-    (function loop() {
-      rx += (mx - rx) * 0.1;
-      ry += (my - ry) * 0.1;
-      gsap.set(ring, { x: rx, y: ry });
-      requestAnimationFrame(loop);
-    })();
-
-    /* card hover: big ring + VIEW text */
-    document.querySelectorAll('.svc-card').forEach(el => {
-      el.addEventListener('mouseenter', () => {
-        ring.classList.add('cursor-big');
-        viewLbl.classList.add('visible');
-      });
-      el.addEventListener('mouseleave', () => {
-        ring.classList.remove('cursor-big');
-        viewLbl.classList.remove('visible');
-      });
-    });
-
-    /* heading hover: caret line */
-    document.querySelectorAll('h1, h2, .ph-headline, .svc-title, .ph-stat-label, .sec-title').forEach(el => {
-      el.addEventListener('mouseenter', () => ring.classList.add('cursor-caret'));
-      el.addEventListener('mouseleave', () => ring.classList.remove('cursor-caret'));
-    });
-
-    /* generic pointer enlargement */
-    document.querySelectorAll('a, button, .social-btn, .hero-cta, .nav-links a').forEach(el => {
-      el.addEventListener('mouseenter', () => { if (!ring.classList.contains('cursor-caret')) ring.classList.add('cursor-big'); });
-      el.addEventListener('mouseleave', () => ring.classList.remove('cursor-big'));
-    });
-  })();
-
-  /* ═══════════════════════════════════════════════════════════════════════════
-     SCROLL TRIGGERS
-  ═══════════════════════════════════════════════════════════════════════════ */
-  function initScrollTriggers() {
-
-    function frameIdx(p) {
-      return Math.min(FRAME_COUNT - 1, Math.floor(p * FRAME_COUNT));
-    }
-
-    /* ── Hero fade-out ───────────────────────────────────────────────────── */
-    /* BUG 2 FIX: Added #hero-vignette-bottom to fade out alongside hero-content */
-    gsap.fromTo(
-      ['#hero-content', '#hero-scroll-indicator'],
-      { opacity: 1 },
-      {
-        opacity: 0, ease: 'none',
-        scrollTrigger: { trigger: '#act1-section', start: 'top 80%', end: 'top top', scrub: true }
-      }
-    );
-
-    /* ── Scroll progress show/hide ───────────────────────────────────────── */
-    ScrollTrigger.create({
-      trigger: '#act1-section', start: 'top 80%',
-      onEnter: () => spEl.classList.add('visible'),
-    });
-    ScrollTrigger.create({
-      trigger: '#services-section', start: 'top 60%',
-      onEnter:    () => gsap.to(spEl, { opacity: 0, duration: 0.4 }),
-      onLeaveBack: () => gsap.to(spEl, { opacity: 1, duration: 0.4 })
-    });
-
-    /* ── Section transition lines ────────────────────────────────────────── */
-    ScrollTrigger.create({ trigger: '#gap1-section',    start: 'top 90%', once: false, onEnter: drawTransitionLine });
-    ScrollTrigger.create({ trigger: '#gap2-section',    start: 'top 90%', once: false, onEnter: drawTransitionLine });
-    ScrollTrigger.create({ trigger: '#gap3-section',    start: 'top 90%', once: false, onEnter: drawTransitionLine });
-    ScrollTrigger.create({ trigger: '#services-section',start: 'top 95%', once: true,  onEnter: drawTransitionLine });
-
-    /* ─────────────────────────────────────────────────────────────────────
-       ACT 1
-    ───────────────────────────────────────────────────────────────────── */
-    const tlA1 = gsap.timeline({ paused: true });
-
-    /* Phrase 1 (0.00–0.20): word punch + body typewriter */
-    tlA1
-      .fromTo('#a1p1', { opacity: 0 }, { opacity: 1, duration: 0.01 }, 0.00)
-      .fromTo('#a1p1-w1', { opacity: 0, scale: 1.2 }, { opacity: 1, scale: 1, duration: 0.025, ease: 'power2.out' }, 0.00)
-      .fromTo('#a1p1-w2', { opacity: 0, scale: 1.2 }, { opacity: 1, scale: 1, duration: 0.025, ease: 'power2.out' }, 0.025)
-      .fromTo('#a1p1-w3', { opacity: 0, scale: 1.2 }, { opacity: 1, scale: 1, duration: 0.025, ease: 'power2.out' }, 0.05)
-      .fromTo('#a1p1-body', { opacity: 0, clipPath: 'inset(0 100% 0 0)' }, { opacity: 1, clipPath: 'inset(0 0% 0 0)', duration: 0.04, ease: 'power2.out' }, 0.07)
-      .to('#a1p1', { opacity: 0, y: -22, duration: 0.025 }, 0.20);
-
-    /* Phrase 2 (0.24–0.44): HP counter slides from right */
-    tlA1
-      .fromTo('#a1p2', { opacity: 0, x: 70 }, { opacity: 1, x: 0, duration: 0.04, ease: 'power2.out' }, 0.24)
-      .fromTo('#a1p2-sub', { opacity: 0, x: 20 }, { opacity: 1, x: 0, duration: 0.03 }, 0.32)
-      .to('#a1p2', { opacity: 0, x: 40, duration: 0.03 }, 0.44);
-
-    /* Phrase 3 (0.49–0.70): stacked words stagger */
-    tlA1
-      .fromTo('#a1p3', { opacity: 0 }, { opacity: 1, duration: 0.01 }, 0.49)
-      .fromTo('#a1p3-w1', { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.03, ease: 'power2.out' }, 0.49)
-      .fromTo('#a1p3-w2', { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.03, ease: 'power2.out' }, 0.51)
-      .fromTo('#a1p3-w3', { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.03, ease: 'power2.out' }, 0.53)
-      .fromTo('#a1p3-w4', { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.03, ease: 'power2.out' }, 0.55)
-      .fromTo('#a1p3-sub', { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.03 }, 0.60)
-      .to('#a1p3', { opacity: 0, duration: 0.03 }, 0.70);
-
-    /* Phrase 4 (0.74–0.89): stat block — rule draws itself */
-    tlA1
-      .fromTo('#a1p4', { opacity: 0, x: 50 }, { opacity: 1, x: 0, duration: 0.04, ease: 'power2.out' }, 0.74)
-      .fromTo('#a1p4-rule', { scaleX: 0 }, { scaleX: 1, duration: 0.05, ease: 'power2.inOut' }, 0.75)
-      .to('#a1p4', { opacity: 0, duration: 0.03 }, 0.89);
-
-    /* Phrase 5 (0.93–1.00): massive red glow */
-    tlA1
-      .fromTo('#a1p5', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.045, ease: 'power2.out' }, 0.93)
-      .to('#a1p5', { opacity: 0, duration: 0.02 }, 0.99);
-
-    /* cache el refs for onUpdate */
-    const a1p1EyebrowEl = document.getElementById('a1p1-eyebrow');
-    const a1p2NumEl     = document.getElementById('a1p2-num');
-
-    ScrollTrigger.create({
-      trigger: '#act1-section', start: 'top top', end: 'bottom top',
-      scrub: 0.5, animation: tlA1,
-      onLeave() {
-        gsap.set(['#a1p1','#a1p2','#a1p3','#a1p4','#a1p5'], { opacity: 0 });
-      },
-      onUpdate(self) {
-        if (self.scroll() < self.start) return;
-        const p   = self.progress;
-        const idx = frameIdx(p);
-        drawFrame(act1Frames[idx]);
-        updateScrollProgress(1, p, idx);
-
-        /* eyebrow timecode */
-        const secs = Math.floor(p * 15);
-        a1p1EyebrowEl.textContent = 'ACT I — 00:' + String(secs).padStart(2, '0');
-
-        /* HP counter */
-        if (p >= 0.24 && p <= 0.44) {
-          const prog = (p - 0.24) / 0.20;
-          a1p2NumEl.textContent = Math.round(500 * prog) + '+';
-        } else if (p > 0.44) {
-          a1p2NumEl.textContent = '500+';
-        } else {
-          a1p2NumEl.textContent = '0+';
-        }
-      }
-    });
-
-
-    /* ─────────────────────────────────────────────────────────────────────
-       ACT 2
-       BUG 1 FIX: scrub changed from 1.5 to 1 so phrase 1 appears immediately
-    ───────────────────────────────────────────────────────────────────── */
-    const tlA2 = gsap.timeline({ paused: true });
-
-    /* Phrase 1 (0.00–0.22): pure dissolve */
-    tlA2
-      .fromTo('#a2p1', { opacity: 0 }, { opacity: 1, duration: 0.07, ease: 'power1.out' }, 0.00)
-      .to('#a2p1', { opacity: 0, duration: 0.05 }, 0.22);
-
-    /* Phrase 2 (0.28–0.50): vertical text clips in + RPM right */
-    tlA2
-      .fromTo('#a2p2', { opacity: 0, clipPath: 'inset(100% 0 0 0)' }, { opacity: 1, clipPath: 'inset(0% 0 0 0)', duration: 0.06, ease: 'power2.out' }, 0.28)
-      .fromTo('#a2p2r', { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.05, ease: 'power2.out' }, 0.29)
-      .fromTo('#a2p2r-sub', { opacity: 0 }, { opacity: 1, duration: 0.04 }, 0.38)
-      .to('#a2p2', { opacity: 0, duration: 0.04 }, 0.50)
-      .to('#a2p2r', { opacity: 0, duration: 0.04 }, 0.50);
-
-    /* Phrase 3 (0.55–0.72): amber bar wipe per line */
-    tlA2
-      .fromTo('#a2p3', { opacity: 0 }, { opacity: 1, duration: 0.01 }, 0.55)
-      .fromTo('#a2p3-b1', { x: '-101%' }, { x: '201%', duration: 0.055, ease: 'power2.inOut' }, 0.55)
-      .fromTo('#a2p3-t1', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 0.055, ease: 'power2.inOut' }, 0.55)
-      .fromTo('#a2p3-b2', { x: '-101%' }, { x: '201%', duration: 0.055, ease: 'power2.inOut' }, 0.608)
-      .fromTo('#a2p3-t2', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 0.055, ease: 'power2.inOut' }, 0.608)
-      .fromTo('#a2p3-sub', { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.03 }, 0.655)
-      .to('#a2p3', { opacity: 0, duration: 0.03 }, 0.72);
-
-    /* Phrase 4 (0.76–0.91): two-col slides from sides */
-    tlA2
-      .fromTo('#a2p4', { opacity: 0 }, { opacity: 1, duration: 0.01 }, 0.76)
-      .fromTo('#a2p4-l', { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 0.05, ease: 'power2.out' }, 0.76)
-      .fromTo('#a2p4-r', { opacity: 0, x:  60 }, { opacity: 1, x: 0, duration: 0.05, ease: 'power2.out' }, 0.76)
-      .to('#a2p4', { opacity: 0, duration: 0.03 }, 0.91);
-
-    /* Phrase 5 (0.94–1.00): full-width center */
-    tlA2
-      .fromTo('#a2p5', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.04, ease: 'power2.out' }, 0.94)
-      .to('#a2p5', { opacity: 0, duration: 0.02 }, 0.99);
-
-    const a2p2rRpmEl = document.getElementById('a2p2r-rpm');
-
-    ScrollTrigger.create({
-      trigger: '#act2-section', start: 'top top', end: 'bottom top',
-      scrub: 0.5, animation: tlA2,
-      onLeave() {
-        gsap.set(['#a2p1','#a2p2','#a2p2r','#a2p3','#a2p4','#a2p5'], { opacity: 0 });
-      },
-      onUpdate(self) {
-        if (self.scroll() < self.start) return;
-        const p   = self.progress;
-        const idx = frameIdx(p);
-        drawFrame(act2Frames[idx]);
-        updateScrollProgress(2, p, idx);
-
-        /* RPM countdown */
-        if (p >= 0.28 && p <= 0.50) {
-          const prog = (p - 0.28) / 0.22;
-          const rpm  = Math.round(12000 * (1 - prog));
-          a2p2rRpmEl.textContent = rpm.toLocaleString() + ' RPM';
-        } else if (p > 0.45) {
-          a2p2rRpmEl.textContent = '0 RPM';
-        } else {
-          a2p2rRpmEl.textContent = '12,000 RPM';
-        }
-      }
-    });
-
-
-    /* ─────────────────────────────────────────────────────────────────────
-       ACT 3
-    ───────────────────────────────────────────────────────────────────── */
-    const tlA3 = gsap.timeline({ paused: true });
-
-    /* Phrase 1 (0.00–0.12): slide from left */
-    tlA3
-      .fromTo('#a3p1', { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: 0.03, ease: 'power2.out' }, 0.00)
-      .to('#a3p1', { opacity: 0, x: -30, duration: 0.02 }, 0.12);
-
-    /* Phrase 2 (0.15–0.30): 01 Engine — rule draws then content */
-    tlA3
-      .fromTo('#a3p2', { opacity: 0, x: 50 }, { opacity: 1, x: 0, duration: 0.03, ease: 'power2.out' }, 0.15)
-      .fromTo('#a3p2-rule', { scaleX: 0 }, { scaleX: 1, duration: 0.04, ease: 'power2.inOut' }, 0.165)
-      .to('#a3p2', { opacity: 0, duration: 0.025 }, 0.30);
-
-    /* Phrase 3 (0.33–0.48): 02 Suspension — rule draws then content */
-    tlA3
-      .fromTo('#a3p3', { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: 0.03, ease: 'power2.out' }, 0.33)
-      .fromTo('#a3p3-rule', { scaleX: 0 }, { scaleX: 1, duration: 0.04, ease: 'power2.inOut' }, 0.345)
-      .to('#a3p3', { opacity: 0, duration: 0.025 }, 0.48);
-
-    /* Phrase 4 (0.51–0.65): NOTHING / ESCAPES / OUR ATTENTION. — blur clears line by line */
-    tlA3
-      .fromTo('#a3p4', { opacity: 0 }, { opacity: 1, duration: 0.01 }, 0.51)
-      .fromTo(a3p4Chars1, { opacity: 0, filter: 'blur(8px)' }, { opacity: 1, filter: 'blur(0px)', stagger: 0.003, duration: 0.035, ease: 'power2.out' }, 0.51)
-      .fromTo(a3p4Chars2, { opacity: 0, filter: 'blur(8px)' }, { opacity: 1, filter: 'blur(0px)', stagger: 0.003, duration: 0.035, ease: 'power2.out' }, 0.535)
-      .fromTo(a3p4Chars3, { opacity: 0, filter: 'blur(8px)' }, { opacity: 1, filter: 'blur(0px)', stagger: 0.0025, duration: 0.035, ease: 'power2.out' }, 0.558)
-      .fromTo('#a3p4-sub', { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.025 }, 0.578)
-      .to('#a3p4', { opacity: 0, duration: 0.025 }, 0.65);
-
-    /* Phrase 5 (0.68–0.80): 03 Drivetrain */
-    tlA3
-      .fromTo('#a3p5', { opacity: 0, x: 50 }, { opacity: 1, x: 0, duration: 0.03, ease: 'power2.out' }, 0.68)
-      .fromTo('#a3p5-rule', { scaleX: 0 }, { scaleX: 1, duration: 0.04, ease: 'power2.inOut' }, 0.695)
-      .to('#a3p5', { opacity: 0, duration: 0.025 }, 0.80);
-
-    /* Phrase 6 (0.82–0.91): 04 Final Inspection */
-    tlA3
-      .fromTo('#a3p6', { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: 0.025, ease: 'power2.out' }, 0.82)
-      .fromTo('#a3p6-rule', { scaleX: 0 }, { scaleX: 1, duration: 0.04, ease: 'power2.inOut' }, 0.835)
-      .to('#a3p6', { opacity: 0, duration: 0.025 }, 0.91);
-
-    /* Phrase 7 (0.93–0.97): BUILT / DIFFERENT. — majestic slow reveal + underline */
-    tlA3
-      .fromTo('#a3p7', { opacity: 0 }, { opacity: 1, duration: 0.01 }, 0.93)
-      .fromTo('#a3p7-built', { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.04, ease: 'power3.out' }, 0.93)
-      .fromTo('#a3p7-diff', { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.04, ease: 'power3.out' }, 0.945)
-      .fromTo('#a3p7-line', { scaleX: 0, opacity: 1 }, { scaleX: 1, opacity: 1, duration: 0.05, ease: 'power2.inOut' }, 0.96)
-      .fromTo('#a3p7-sub', { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.03 }, 0.975)
-      .to('#a3p7', { opacity: 0, duration: 0.01 }, 0.985);
-
-    /* Finale (0.988–1.00) */
-    tlA3
-      .fromTo('#finale-overlay', { opacity: 0 }, { opacity: 1, duration: 0.01 }, 0.988)
-      .fromTo('#finale-name', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.01 }, 0.985)
-      .fromTo('#finale-tag',  { opacity: 0 }, { opacity: 1, duration: 0.008 }, 0.990)
-      .fromTo('#finale-line', { width: '0%', opacity: 1 }, { width: '40vw', opacity: 1, duration: 0.01, ease: 'power2.inOut' }, 0.993);
-
-    ScrollTrigger.create({
-      trigger: '#act3-section', start: 'top top', end: 'bottom top',
-      scrub: 0.5, animation: tlA3,
-      onLeave() {
-        gsap.set(['#a3p1','#a3p2','#a3p3','#a3p4','#a3p5','#a3p6','#a3p7'], { opacity: 0 });
-      },
-      onUpdate(self) {
-        if (self.scroll() < self.start) return;
-        const p   = self.progress;
-        const idx = frameIdx(p);
-        drawFrame(act3Frames[idx]);
-        updateScrollProgress(3, p, idx);
-      }
-    });
-
-    /* ── Initial hidden states ───────────────────────────────────────────── */
-    gsap.set(['.sec-eyebrow', '.sec-title', '.sec-title-rule'], { opacity: 0, y: 40 });
-    gsap.set('.svc-card', { opacity: 0, y: 50 });
-    gsap.set('.stat-item', { opacity: 0, y: 30 });
-    gsap.set(['.curio-headline', '.curio-body', '.curio-cue', '.curio-stat-item'], { opacity: 0, y: 36 });
-
-    /* ── Interstitial section reveal ────────────────────────────────────── */
-    ScrollTrigger.create({
-      trigger: '#interstitial-section', start: 'top 60%', once: true,
-      onEnter() {
-        document.querySelector('.trust-row').classList.add('revealed');
-        gsap.to('.curio-headline',  { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out', delay: 0.1 });
-        gsap.to('.curio-body',      { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out', delay: 0.35 });
-        gsap.to('.curio-cue',       { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out', delay: 0.55 });
-        gsap.to('.curio-stat-item', { opacity: 1, y: 0, duration: 0.7, stagger: 0.12, ease: 'power3.out', delay: 0.2 });
-      }
-    });
-    ScrollTrigger.create({
-      trigger: '#interstitial-section', start: 'top 60%',
-      onEnter:     () => gsap.to(spEl, { opacity: 0, duration: 0.4 }),
-      onLeaveBack: () => gsap.to(spEl, { opacity: 1, duration: 0.4 })
-    });
-    ScrollTrigger.create({ trigger: '#interstitial-section', start: 'top 95%', once: true, onEnter: drawTransitionLine });
-
-    /* ── Services section reveal ─────────────────────────────────────────── */
-    gsap.fromTo(
-      ['.sec-eyebrow', '.sec-title', '.sec-title-rule'],
-      { opacity: 0, y: 40 },
-      { opacity: 1, y: 0, duration: 1, stagger: 0.12, ease: 'power3.out',
-        scrollTrigger: { trigger: '#services-section', start: 'top 80%', once: true } }
-    );
-
-    ScrollTrigger.batch(['#svc1','#svc2','#svc3','#svc4'], {
-      onEnter(els) {
-        gsap.fromTo(els,
-          { opacity: 0, y: 50 },
-          { opacity: 1, y: 0, duration: 0.9, stagger: 0.14, ease: 'power3.out', clearProps: 'y' }
-        );
-      },
-      start: 'top 88%', once: true
-    });
-
-    /* ── Stats counter ───────────────────────────────────────────────────── */
-    function countUp(elId, end, suffix) {
-      const el  = document.getElementById(elId);
-      const obj = { v: 0 };
-      gsap.to(obj, {
-        v: end, duration: 2, ease: 'power2.out',
-        onUpdate()   { el.textContent = Math.round(obj.v).toLocaleString() + suffix; },
-        onComplete() { el.textContent = end.toLocaleString() + suffix; }
-      });
-    }
-
-    ScrollTrigger.create({
-      trigger: '#stats-section', start: 'top 82%', once: true,
-      onEnter() {
-        gsap.fromTo('.stat-item',
-          { opacity: 0, y: 30 },
-          { opacity: 1, y: 0, duration: 0.9, stagger: 0.12, ease: 'power3.out' }
-        );
-        countUp('sn1', 2400, '+');
-        countUp('sn2', 18, '');
-        countUp('sn3', 100, '%');
-      }
-    });
-
-    /* ── Footer tagline sequential fade ─────────────────────────────────── */
-    ScrollTrigger.create({
-      trigger: '#footer', start: 'top 80%', once: true,
-      onEnter() {
-        gsap.to('#ftl1', { opacity: 1, duration: 0.6, ease: 'power2.out' });
-        gsap.to('#ftl2', { opacity: 1, duration: 0.6, delay: 0.4, ease: 'power2.out' });
-        gsap.to('#ftq',  { opacity: 1, duration: 0.6, delay: 0.8, ease: 'power2.out' });
-      }
-    });
-
-    /* ── ACT 4 — SPEC REVEAL ─────────────────────────────────────────────── */
-    gsap.set(['#a4p0','#a4p1','#a4p2','#a4p3','#a4sg','#a4p5'], { opacity: 0 });
-    gsap.set('.spec-grid-cell', { opacity: 0, y: 18 });
-
-    const eA4 = 'cubic-bezier(0.32, 0.72, 0, 1)';
-    const tlA4 = gsap.timeline({ paused: true });
-
-    /* Phase -1: fade act3 finale out so act4 owns the canvas (0–4%) */
-    tlA4
-      .to(['#finale-overlay','#finale-name','#finale-tag','#finale-line'],
-        { opacity: 0, duration: 0.04, ease: 'power2.in' }, 0.00);
-
-    /* Phase 0: title (0–12%) */
-    tlA4
-      .fromTo('#a4p0', { opacity: 0, y: 28 }, { opacity: 1, y: 0, duration: 0.07, ease: eA4 }, 0.00)
-      .to(  '#a4p0', { opacity: 0, y: -20, duration: 0.05 }, 0.11);
-
-    /* Phase 1: engine spec right (10–24%) */
-    tlA4
-      .fromTo('#a4p1', { opacity: 0, x: 50 }, { opacity: 1, x: 0, duration: 0.07, ease: eA4 }, 0.10)
-      .to(  '#a4p1', { opacity: 0, x: 30, duration: 0.05 }, 0.23);
-
-    /* Phase 2: power output left (22–36%) */
-    tlA4
-      .fromTo('#a4p2', { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: 0.07, ease: eA4 }, 0.22)
-      .to(  '#a4p2', { opacity: 0, x: -30, duration: 0.05 }, 0.35);
-
-    /* Phase 3: sprint center giant (34–50%) */
-    tlA4
-      .fromTo('#a4p3', { opacity: 0, scale: 1.06 }, { opacity: 1, scale: 1, duration: 0.08, ease: eA4 }, 0.34)
-      .to(  '#a4p3', { opacity: 0, scale: 0.96, duration: 0.05 }, 0.50);
-
-    /* Phase 4: full spec grid bottom (48–68%) */
-    tlA4
-      .to(  '#a4sg', { opacity: 1, duration: 0.05 }, 0.48)
-      .fromTo('#a4gr', { scaleX: 0 }, { scaleX: 1, duration: 0.09, ease: 'power2.inOut' }, 0.49)
-      .fromTo('.spec-grid-cell', { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.05, stagger: 0.018, ease: eA4 }, 0.54)
-      .to(  '#a4sg', { opacity: 0, duration: 0.04 }, 0.67);
-
-    /* Phase 5: closing phrase center (66–84%) */
-    tlA4
-      .fromTo('#a4p5', { opacity: 0, y: 44 }, { opacity: 1, y: 0, duration: 0.08, ease: eA4 }, 0.66)
-      .to(  '#a4p5', { opacity: 0, duration: 0.04 }, 0.85);
-
-    /* Act 4: drives frames + spec timeline */
-    ScrollTrigger.create({
-      trigger: '#act4-section', start: 'top top', end: 'bottom top',
-      scrub: 0.5,
-      onEnter() {
-        gsap.to(spEl, { opacity: 0, duration: 0.3 });
-        if (window.glParticleMat)
-          gsap.to(window.glParticleMat, { opacity: 0.34, duration: 1.2, ease: 'power2.out' });
-      },
-      onLeave() {
-        tlA4.progress(1);
-        if (window.glParticleMat)
-          gsap.to(window.glParticleMat, { opacity: 0.20, duration: 1.0 });
-      },
-      onLeaveBack() {
-        tlA4.progress(0);
-        gsap.to(spEl, { opacity: 1, duration: 0.4 });
-        if (window.glParticleMat)
-          gsap.to(window.glParticleMat, { opacity: 0.20, duration: 1.0 });
-      },
-      onUpdate(self) {
-        if (self.scroll() < self.start) return;
-        const p   = self.progress;
-        const idx = frameIdx(p);
-        if (act4Frames[idx]) drawFrame(act4Frames[idx]);
-        tlA4.progress(p);
-      }
-    });
-
-    ScrollTrigger.refresh();
-
-    /* BUG 5 FIX: Delayed refresh to recalculate pin spacers after fonts/frames */
-    window.addEventListener('load', () => {
-      setTimeout(() => ScrollTrigger.refresh(), 300);
-    });
-  }
-
-  /* ═══════════════════════════════════════════════════════════════════════════
-     HERO CTA
-  ═══════════════════════════════════════════════════════════════════════════ */
-  document.getElementById('hero-cta-btn').addEventListener('click', () => {
-    document.getElementById('act1-section').scrollIntoView({ behavior: 'smooth' });
-  });
-
-  /* ═══════════════════════════════════════════════════════════════════════════
-     THREE.JS — AMBIENT PARTICLE SYSTEM
-  ═══════════════════════════════════════════════════════════════════════════ */
-  (function initThreeGL() {
-    if (typeof THREE === 'undefined') return;
-
-    const glEl    = document.getElementById('gl-canvas');
-    const renderer = new THREE.WebGLRenderer({ canvas: glEl, alpha: true, antialias: false });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-    renderer.setSize(innerWidth, innerHeight);
-
-    const scene = new THREE.Scene();
-    const cam   = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 100);
-    cam.position.z = 6;
-
-    /* ── Build particle geometry ── */
-    const N   = 420;
-    const pos = new Float32Array(N * 3);
-    const col = new Float32Array(N * 3);
-    const spd = new Float32Array(N);
-    const phi = new Float32Array(N);
-
-    for (let i = 0; i < N; i++) {
-      const i3 = i * 3;
-      pos[i3]   = (Math.random() - 0.5) * 20;
-      pos[i3+1] = (Math.random() - 0.5) * 12;
-      pos[i3+2] = (Math.random() - 0.5) * 6;
-      spd[i]    = 0.0007 + Math.random() * 0.0022;
-      phi[i]    = Math.random() * Math.PI * 2;
-
-      const t   = Math.pow(Math.random(), 2.2);
-      col[i3]   = (200 + t * 55)  / 255;
-      col[i3+1] = (134 + t * 100) / 255;
-      col[i3+2] = ( 10 + t * 220) / 255;
-    }
-
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    geo.setAttribute('color',    new THREE.BufferAttribute(col, 3));
-
-    const mat = new THREE.PointsMaterial({
-      size:          0.038,
-      vertexColors:  true,
-      transparent:   true,
-      opacity:       0.20,
-      sizeAttenuation: true,
-      blending:      THREE.AdditiveBlending,
-      depthWrite:    false,
-    });
-    window.glParticleMat = mat;
-
-    scene.add(new THREE.Points(geo, mat));
-
-    /* ── Mouse parallax ── */
-    let mx = 0, my = 0;
-    document.addEventListener('mousemove', e => {
-      mx = e.clientX / innerWidth  - 0.5;
-      my = e.clientY / innerHeight - 0.5;
-    });
-
-    window.addEventListener('resize', () => {
-      cam.aspect = innerWidth / innerHeight;
-      cam.updateProjectionMatrix();
-      renderer.setSize(innerWidth, innerHeight);
-    });
-
-    /* ── Animation loop ── */
-    const pa = geo.attributes.position.array;
-    let   t  = 0;
-
-    (function tick() {
-      requestAnimationFrame(tick);
-      t += 1;
-
-      for (let i = 0; i < N; i++) {
-        const i3 = i * 3;
-        pa[i3]   += Math.sin(phi[i] + t * 0.006) * 0.0005;
-        pa[i3+1] += spd[i];
-        if (pa[i3+1] > 6) {
-          pa[i3+1] = -6;
-          pa[i3]   = (Math.random() - 0.5) * 20;
-        }
-      }
-
-      geo.attributes.position.needsUpdate = true;
-
-      cam.position.x += (mx * 0.28 - cam.position.x) * 0.022;
-      cam.position.y += (-my * 0.16 - cam.position.y) * 0.022;
-
-      renderer.render(scene, cam);
-    })();
-  })();
-
-  /* ═══════════════════════════════════════════════════════════════════════════
-     MUSTANG 3D INTRO
-  ═══════════════════════════════════════════════════════════════════════════ */
-  (function initMustangIntro() {
-    if (typeof THREE === 'undefined') { introComplete = true; maybeLaunch(); return; }
-
-    const overlay     = document.getElementById('mustang-intro');
-    const introCanvas = document.getElementById('mustang-canvas');
-
-    /* ── Renderer ─────────────────────────────────────────────────────────── */
-    const iR = new THREE.WebGLRenderer({ canvas: introCanvas, antialias: true });
-    iR.setSize(innerWidth, innerHeight);
-    iR.setPixelRatio(Math.min(devicePixelRatio, 2));
-    iR.shadowMap.enabled   = true;
-    iR.shadowMap.type      = THREE.PCFSoftShadowMap;
-    iR.toneMapping         = THREE.ACESFilmicToneMapping;
-    iR.toneMappingExposure = 1.0;
-    introCanvas.style.opacity = '0';
-
-    /* ── Scene ────────────────────────────────────────────────────────────── */
-    const iScene = new THREE.Scene();
-    const pmrem  = new THREE.PMREMGenerator(iR);
-    pmrem.compileEquirectangularShader();
-
-    /* ── Camera ───────────────────────────────────────────────────────────── */
-    const iCam = new THREE.PerspectiveCamera(42, innerWidth / innerHeight, 0.05, 500000);
-    iCam.position.set(0, 3, 10);
-
-    /* ── Lights ───────────────────────────────────────────────────────────── */
-    /* subtle ambient only — let the sun do the work */
-    const hemi = new THREE.HemisphereLight(0xffe0a0, 0x8b4513, 0.4);
-    iScene.add(hemi);
-
-    /* key sun — strong low-angle golden hour, forces hard shadows */
-    const iSun = new THREE.DirectionalLight(0xffd080, 8.0);
-    iSun.position.set(40, 30, -60);
-    iSun.castShadow             = true;
-    iSun.shadow.mapSize.width   = 4096;
-    iSun.shadow.mapSize.height  = 4096;
-    iSun.shadow.camera.near     = 1;
-    iSun.shadow.camera.far      = 120;
-    iSun.shadow.camera.left     = -20;
-    iSun.shadow.camera.right    = 20;
-    iSun.shadow.camera.top      = 20;
-    iSun.shadow.camera.bottom   = -20;
-    iSun.shadow.bias            = -0.0008;
-    iSun.shadow.normalBias      = 0.018;
-    iScene.add(iSun);
-
-    /* sky-bounce fill — cool open-sky blue on shadow side */
-    const iFill = new THREE.DirectionalLight(0x6699cc, 0.35);
-    iFill.position.set(50, 35, 40);
-    iScene.add(iFill);
-
-    /* ── State ────────────────────────────────────────────────────────────── */
-    let iTl     = null;
-    let _ready  = false;
-    const iMixers  = [];
-    const iClock   = new THREE.Clock();
-    let iRaf;
-    const iLookAt    = new THREE.Vector3();
-    let iCamRadius   = 20;
-    let iCamRadMin   = 2;
-    let iCarSpan     = 1;           /* car longest dim, set after load */
-    let iDust        = null;        /* floating dust Points mesh */
-    let iDustVel     = null;        /* dust particle velocities */
-    let iCarShaders  = [];          /* compiled shader refs for uTime uniform */
-    let iCamRadMax   = 80;
-    /* hover camera state */
-    const iCamBase   = Math.PI * 0.10;
-    let iCamAz       = iCamBase;
-    let iCamAzTgt    = iCamBase;
-    let iCamEl       = 0.18;
-    let iCamElTgt    = 0.18;
-    let iIsHovering  = false;
-    let iDriftAngle  = iCamBase;
-
-    /* ── GSAP text reveal — user must click ENTER SITE to proceed ─────────── */
-    function _buildTimeline() {
-      iTl = gsap.timeline({
-        paused: true,
-        onComplete() {
-          gsap.to('#mi-skip', { scale: 1.06, duration: 0.45, ease: 'power2.out',
-            yoyo: true, repeat: 3 });
-        }
-      });
-      iTl.to('#mi-amber-line', { width: '28vw', duration: 0.9, ease: 'power2.inOut' }, 1.2);
-      iTl.fromTo('#mi-badge', { opacity:0, y:16 }, { opacity:1, y:0, duration:0.6, ease:'power2.out' }, 1.8);
-      iTl.fromTo('#mi-name',  { opacity:0, scaleX:0.88, transformOrigin:'left center' },
-                 { opacity:1, scaleX:1, duration:0.75, ease:'power3.out' }, 2.3);
-      iTl.fromTo('#mi-spec',  { opacity:0 }, { opacity:1, duration:0.8 }, 3.0);
-      iTl.fromTo('#mi-skip',  { opacity:0, y:8 }, { opacity:1, y:0, duration:0.5, ease:'power2.out' }, 4.0);
-    }
-
-    function _onModelReady() {
-      if (_ready) return;
-      _ready = true;
-      _buildTimeline();
-      introCanvas.style.transition = 'opacity 0.6s ease';
-      introCanvas.style.opacity    = '1';
-      setTimeout(() => iTl.play(), 600);
-    }
-    setTimeout(() => _onModelReady(), 15000); /* fallback if load stalls */
-
-    /* ── Dynamic imports ──────────────────────────────────────────────────── */
-    Promise.all([
-      import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js'),
-      import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/DRACOLoader.js'),
-      import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/RGBELoader.js'),
-      import('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/objects/Lensflare.js'),
-    ]).then(([{ GLTFLoader }, { DRACOLoader }, { RGBELoader }, { Lensflare, LensflareElement }]) => {
-
-      /* ── HDRI — IBL environment + visible sky background ─────────────────── */
-      new RGBELoader().load('hdri.hdr', (hdrTex) => {
-        hdrTex.mapping      = THREE.EquirectangularReflectionMapping;
-        const envMap        = pmrem.fromEquirectangular(hdrTex).texture;
-        pmrem.dispose(); hdrTex.dispose();
-        iScene.background           = envMap;
-        iScene.environment          = envMap;
-        iScene.backgroundBlurriness = 0.02;
-        iScene.backgroundIntensity  = 1.0;
-        if (iScene.backgroundRotation) iScene.backgroundRotation.y = Math.PI * 1.15;
-      });
-
-      const dracoLoader = new DRACOLoader();
-      dracoLoader.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/libs/draco/');
-      const gltfLoader = new GLTFLoader();
-      gltfLoader.setDRACOLoader(dracoLoader);
-
-      /* ── Load combined scene (car + canyon already placed) ───────────────── */
-      gltfLoader.load('scene.glb', (gltf) => {
-        const s = gltf.scene;
-
-        /* shadows + IBL boost on every mesh */
-        s.traverse(c => {
-          if (!c.isMesh) return;
-          c.castShadow = c.receiveShadow = true;
-          const mats = Array.isArray(c.material) ? c.material : [c.material];
-          mats.forEach(m => {
-            if (!m || (!m.isMeshStandardMaterial && !m.isMeshPhysicalMaterial)) return;
-            m.envMapIntensity = 0.6;
-            m.onBeforeCompile = (shader) => {
-              shader.uniforms.uTime = { value: 0 };
-              iCarShaders.push(shader);
-              shader.fragmentShader = 'uniform float uTime;\n' + shader.fragmentShader;
-              shader.fragmentShader = shader.fragmentShader.replace(
-                '#include <output_fragment>',
-                [
-                  /* Fresnel warm rim — bright gold edge glow at silhouette */
-                  'float iFresnel  = pow(1.0 - clamp(dot(geometry.normal, geometry.viewDir), 0.0, 1.0), 2.5);',
-                  /* animated iridescence: gold -> blue-violet cycle ~18 s */
-                  'float iIriShift = sin(uTime * 0.35) * 0.5 + 0.5;',
-                  'float iMetalFac = clamp(metalnessFactor * 2.0, 0.0, 1.0);',
-                  'vec3  iRimCol   = mix(vec3(1.0, 0.68, 0.22), vec3(0.38, 0.55, 1.0), iIriShift * iMetalFac);',
-                  'outgoingLight  += iFresnel * iRimCol * 1.4;',
-                  /* sky bounce — cool blue on top-facing surfaces (hood, roof) */
-                  'float iSkyFace = clamp(geometry.normal.y * 0.5 + 0.5, 0.0, 1.0);',
-                  'outgoingLight += iSkyFace * vec3(0.32, 0.48, 0.90) * 0.11;',
-                  '#include <output_fragment>'
-                ].join('\n')
-              );
-            };
-          });
-        });
-
-        /* play any baked animations */
-        if (gltf.animations?.length) {
-          const mx = new THREE.AnimationMixer(s);
-          gltf.animations.forEach(a => mx.clipAction(a).play());
-          iMixers.push(mx);
-        }
-
-        iScene.add(s);
-        s.updateMatrixWorld(true);
-
-        /* full scene bounds — used for near/far and sun placement */
-        const box    = new THREE.Box3().setFromObject(s);
-        const center = box.getCenter(new THREE.Vector3());
-        const size   = box.getSize(new THREE.Vector3());
-        const maxDim = Math.max(size.x, size.y, size.z);
-
-        iCam.near = maxDim * 0.001;
-        iCam.far  = maxDim * 20;
-        iCam.updateProjectionMatrix();
-
-        /* ── find the Mustang by name, then use its bounding box ─────────────
-           Falls back to finding the smallest top-level child (car << canyon) */
-        let carBox = null;
-        const carKeywords = ['mustang','car','vehicle','auto','ford','shelby','muscle','body'];
-        s.traverse(c => {
-          if (carBox) return;
-          if (carKeywords.some(k => c.name.toLowerCase().includes(k))) {
-            c.updateMatrixWorld(true);
-            carBox = new THREE.Box3().setFromObject(c);
-          }
-        });
-
-        /* fallback: smallest-volume direct child = the car, not the canyon */
-        if (!carBox) {
-          let minVol = Infinity;
-          s.children.forEach(child => {
-            const cb = new THREE.Box3().setFromObject(child);
-            const cs = cb.getSize(new THREE.Vector3());
-            const vol = cs.x * cs.y * cs.z;
-            if (vol > 0 && vol < minVol) { minVol = vol; carBox = cb; }
-          });
-        }
-
-        /* final fallback: aim at lower-center of scene (terrain/car level) */
-        if (!carBox) {
-          carBox = new THREE.Box3(
-            new THREE.Vector3(center.x - 2, box.min.y, center.z - 2),
-            new THREE.Vector3(center.x + 2, box.min.y + size.y * 0.25, center.z + 2)
-          );
-        }
-
-        const carCenter = carBox.getCenter(new THREE.Vector3());
-        const carSize   = carBox.getSize(new THREE.Vector3());
-        const carSpan   = Math.max(carSize.x, carSize.z);
-        iCamRadius = carSpan * 1.6;   /* tight on the car */
-        iCamRadMin = carSpan * 0.7;   /* zoom in limit  */
-        iCamRadMax = carSpan * 6.0;   /* zoom out limit */
-        iCamAz = iCamAzTgt = iCamBase;
-        iLookAt.copy(carCenter);
-
-        /* Shadow frustum covers car + generous ground around it */
-        const sd = carSpan * 3.5;
-        iSun.shadow.camera.left   = -sd;
-        iSun.shadow.camera.right  =  sd;
-        iSun.shadow.camera.top    =  sd;
-        iSun.shadow.camera.bottom = -sd;
-        iSun.shadow.camera.near   = 0.1;
-        iSun.shadow.camera.far    = carSpan * 30;
-        iSun.shadow.bias          = -0.002;
-        iSun.shadow.normalBias    = 0.05;
-        iSun.shadow.camera.updateProjectionMatrix();
-
-        /* Sun aimed at car center, low golden-hour angle */
-        iSun.target.position.copy(carCenter);
-        iScene.add(iSun.target);
-        iSun.position.set(
-          carCenter.x + carSpan * 4,
-          carCenter.y + carSpan * 2.5,
-          carCenter.z + carSpan * 3
-        );
-        iSun.target.updateMatrixWorld();
-        iSun.shadow.camera.updateProjectionMatrix();
-        iR.shadowMap.needsUpdate = true;
-
-        /* Dedicated overhead shadow light — guarantees underbody shadow */
-        const shadowSpot = new THREE.SpotLight(0xfff0cc, 4.5);
-        shadowSpot.position.set(carCenter.x, carCenter.y + carSpan * 5, carCenter.z);
-        shadowSpot.target.position.copy(carCenter);
-        shadowSpot.angle            = Math.PI / 5;
-        shadowSpot.penumbra         = 0.4;
-        shadowSpot.castShadow       = true;
-        shadowSpot.shadow.mapSize.width  = 2048;
-        shadowSpot.shadow.mapSize.height = 2048;
-        shadowSpot.shadow.camera.near    = carSpan * 0.5;
-        shadowSpot.shadow.camera.far     = carSpan * 10;
-        shadowSpot.shadow.bias           = -0.001;
-        iScene.add(shadowSpot);
-        iScene.add(shadowSpot.target);
-
-        iCarSpan = carSpan;
-        iScene.fog = new THREE.FogExp2(0xe09060, 0.16 / carSpan);
-
-
-        /* ── 2. CAR HEADLIGHTS — invisible point lights only, no sphere ── */
-        const headY  = carBox.min.y + carSize.y * 0.52;
-        const headX  = carSize.x * 0.32;
-        const headZ  = carBox.max.z - carSize.z * 0.05;
-        [-headX, headX].forEach(xOff => {
-          const hl = new THREE.PointLight(0xfff0cc, carSpan * 0.8, carSpan * 3);
-          hl.position.set(carCenter.x + xOff, headY, headZ);
-          iScene.add(hl);
-        });
-
-
-        /* ── Contact shadow blob under the car ──────────────────────────────
-           A dark soft ellipse sitting just above the ground gives the car
-           visual weight and grounds it in the scene                        */
-
-        /* ── Warm ground bounce — light coming up from the hot desert sand */
-        const groundBounce = new THREE.PointLight(0xff8833, carSpan * 1.8, carSpan * 4);
-        groundBounce.position.set(carCenter.x, box.min.y + 0.5, carCenter.z);
-        iScene.add(groundBounce);
-
-
-        _onModelReady();
-      }, undefined, err => { console.error('scene.glb error:', err); _onModelReady(); });
-
-    }).catch(err => { console.warn('3D intro failed:', err); finishIntro(); });
-
-    /* ── Hover ±45° + scroll zoom ─────────────────────────────────────────── */
-    introCanvas.addEventListener('mousemove', e => {
-      iIsHovering = true;
-      const nx = (e.clientX / innerWidth)  - 0.5;
-      const ny = (e.clientY / innerHeight) - 0.5;
-      iCamAzTgt = iCamBase + nx * (Math.PI / 2);
-      iCamElTgt = 0.18 - ny * 0.28;
-    });
-    introCanvas.addEventListener('mouseleave', () => {
-      iIsHovering = false;
-      iCamElTgt = 0.18;
-    });
-
-    /* ── Render loop ──────────────────────────────────────────────────────── */
-    (function iTick() {
-      iRaf = requestAnimationFrame(iTick);
-      const d = iClock.getDelta();
-      const t = iClock.getElapsedTime();
-      iMixers.forEach(m => m.update(d));
-
-
-      /* ── update Fresnel/iridescence shader time ── */
-      iCarShaders.forEach(sh => { sh.uniforms.uTime.value = t; });
-
-      /* ── sun intensity breathe — clouds passing ── */
-      iSun.intensity = 8.0 + Math.sin(t * 0.22) * 0.4;
-
-      /* ── very slow sky rotation — time passing ── */
-      if (iScene.backgroundRotation) iScene.backgroundRotation.y = Math.PI * 1.15 + t * 0.0015;
-
-      iCamAz = THREE.MathUtils.lerp(iCamAz, iCamAzTgt, 0.05);
-      iCamEl = THREE.MathUtils.lerp(iCamEl, iCamElTgt, 0.05);
-      const drift = iCamRadius * 0.0008;
-      iCam.position.set(
-        iLookAt.x + iCamRadius * Math.cos(iCamEl) * Math.sin(iCamAz) + Math.sin(t * 0.23) * drift,
-        iLookAt.y + iCamRadius * Math.sin(iCamEl)                     + Math.cos(t * 0.31) * drift * 0.6,
-        iLookAt.z + iCamRadius * Math.cos(iCamEl) * Math.cos(iCamAz) + Math.sin(t * 0.17) * drift * 0.8
-      );
-      iCam.lookAt(iLookAt);
-
-
-      iR.render(iScene, iCam);
-    })();
-
-    window.addEventListener('resize', () => {
-      iCam.aspect = innerWidth / innerHeight;
-      iCam.updateProjectionMatrix();
-      iR.setSize(innerWidth, innerHeight);
-    });
-
-    document.getElementById('mi-skip').addEventListener('click', () => {
-      gsap.to(overlay, { opacity: 0, duration: 0.7, ease: 'power2.inOut',
-        onComplete: finishIntro });
-    });
-
-    function finishIntro() {
-      cancelAnimationFrame(iRaf);
-      iR.dispose();
-      overlay.style.display = 'none';
-      introComplete = true;
-      maybeLaunch();
-    }
-  })();
-
-  </script>
-
+  <script src="app.js"></script>
+  <script type="module" src="scenes.js"></script>
 </body>
 </html>
